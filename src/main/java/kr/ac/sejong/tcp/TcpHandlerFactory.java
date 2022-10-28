@@ -1,6 +1,4 @@
-package kr.ac.sejong.web;
-
-import kr.ac.sejong.tcp.TcpHandler;
+package kr.ac.sejong.tcp;
 
 public interface TcpHandlerFactory {
     TcpHandler create();
