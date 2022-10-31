@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,7 +31,7 @@ public class App
             while (true) {
                 socket = ss.accept();
                 // readline 함수 쓰기 위해서
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream(), StandardCharsets.ISO_8859_1));
                 try(in){
                     String msg = getUntilNlNl(in);
                     String response = makeHttpResponse("200 OK", getPath(msg));
