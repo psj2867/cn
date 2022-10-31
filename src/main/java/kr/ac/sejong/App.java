@@ -64,7 +64,16 @@ public class App
         return matcher.group(1);
     }
     public String makeHttpResponse(String code, String msg){
-        return "HTTP/1.0 " + code + " \n\n" + msg;
+        StringBuilder sb = new StringBuilder();
+        sb.append("HTTP/1.0 ");
+        sb.append(code);
+        sb.append("\r\n");
+        int length = msg.getBytes().length;
+        sb.append("Content-length: ").append(length);
+        sb.append("\r\n");
+        sb.append("\r\n");
+        sb.append(msg);
+        return sb.toString();
     }
     public void send(Socket socket, String response) throws IOException {
         OutputStreamWriter writer = new OutputStreamWriter(socket.getOutputStream());
