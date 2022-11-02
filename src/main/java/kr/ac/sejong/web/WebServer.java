@@ -16,6 +16,14 @@ import kr.ac.sejong.web.env.YamlParser;
 import kr.ac.sejong.web.exception.WebServerException;
 
 public class WebServer {
+    private final Logger logger = Logger.getLogger(WebServer.class.getName());
+    // SEVERE (최고치)
+    // WARNING
+    // INFO
+    // CONFIG
+    // FINE
+    // FINER
+    // FINEST (최저치)
     private final ChainMap<String, String> setting
         = new ChainMap<>(Arrays.asList(
         Env.system_env(),
@@ -35,18 +43,22 @@ public class WebServer {
     // args > file > env > default
 
     public WebServer() {
+        setLogger();
+        logger.config("env - read system environment variable");
         this.httpManager = defaultManager();
         Env.valid(this.setting);
         setLogger();
     }
 
     public WebServer(String[] args) throws WebServerException {
+        setLogger();
+        logger.config("env - read system environment variable");
+        logger.config("env - read args ");
         Map<String, String> args_env = Env.args_env(args);
 
         addFileSetting(args_env.get(EnvKeys.FILE.getKey()));
         this.setting.addFirst(args_env);
         Env.valid(this.setting);
-        setLogger();
     }
 
     private void addFileSetting(String file) throws WebServerException {
@@ -55,6 +67,9 @@ public class WebServer {
             return;
         }
         YamlParser file_setting = new YamlParser(file);
+
+        logger.config("env - read file setting " + file );
+
         this.setting.addFirst(file_setting.getRootEnv());
         this.httpManager = file_setting.getHttpManagement();
     }
@@ -73,6 +88,10 @@ public class WebServer {
         this.setShutdownHook();
         this.tcpServer.setDaemon(true);
         this.tcpServer.start();
+
+        String ip = this.setting.get(EnvKeys.IP.getKey());
+        String port = this.setting.get(EnvKeys.PORT.getKey());
+        logger.info("server - server start " + ip + ":" + port );
         try (Scanner sc = new Scanner(System.in)) {
             while (true) {
                 if(sc.nextLine().equals("quit"))
@@ -96,14 +115,14 @@ public class WebServer {
     }
     private final int SHUTDOWN_TIMEOUT_MS = 5 * 1000;
     private void shutdown() {
-        System.out.println("\nThe server is being stopped...");
+        logger.info("\nserver - The server is being stopped...");
         this.tcpServer.interrupt();
         try {
             this.tcpServer.join( SHUTDOWN_TIMEOUT_MS );
         } catch (InterruptedException e) {
-            System.out.println("time out - shutdown force");
+            logger.warning("time out - shutdown force");
         }
-        System.out.println("stop server");
+        logger.info("server - stop server");
     }
 
 }
