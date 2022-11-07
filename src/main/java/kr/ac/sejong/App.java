@@ -10,6 +10,7 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Hello world!
@@ -41,7 +42,13 @@ public class App {
             try {
                 socket = ss.accept();
                 String request = getUntilNlNl(socket.getInputStream());
-                String response = makeHttpResponse("200 OK", getPath(request));
+                String path = getPath(request);
+                String fileContents = findFile(path);
+                String response = "";
+                if(fileContents == null) 
+                    response = makeHttpResponse("404 Not Found","file not found");
+                else
+                    response = makeHttpResponse("200 OK", fileContents);                
                 send(socket, response);
             } catch (Exception e) {
                 System.out.println(e.getMessage());
@@ -72,6 +79,20 @@ public class App {
         Matcher matcher = pattern.matcher(msg);
         matcher.find();
         return matcher.group(2);
+    }
+
+    private final String DEFAULT_FILE = "index.html";
+
+    public String findFile(String path){
+        if(path.equals("/"))
+            path = path + DEFAULT_FILE;
+        try (
+            InputStream is = App.class.getResourceAsStream("/static"+path) ;
+            BufferedReader br =new BufferedReader(new InputStreamReader(is)); ) {
+            return br.lines().collect(Collectors.joining("\r\n"));
+        } catch (Exception e) {
+            return null;
+        }         
     }
 
     public String makeHttpResponse(String code, String msg) {
