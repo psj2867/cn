@@ -100,7 +100,8 @@ public class App {
         StringBuilder sb = new StringBuilder();
 
         sb.append("HTTP/1.0 ").append(code).append("\r\n");
-        sb.append("Content-length: ").append(length).append("\r\n");
+        sb.append("Content-Length: ").append(length).append("\r\n");
+        sb.append("Content-Type: text/html").append("\r\n");        
         sb.append("\r\n");
         sb.append(msg);
 
